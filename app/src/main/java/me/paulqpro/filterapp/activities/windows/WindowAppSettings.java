@@ -1,4 +1,4 @@
-package me.paulqpro.filterapp;
+package me.paulqpro.filterapp.activities.windows;
 
 import android.os.Bundle;
 
@@ -7,7 +7,10 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-public class WindowAppSettings extends Fragment {
+
+import me.paulqpro.filterapp.R;
+
+public class WindowAppSettings extends Fragment { //unused. for future
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -1,4 +1,4 @@
-package me.paulqpro.filterapp;
+package me.paulqpro.filterapp.activities.windows;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -18,7 +18,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class WindowFilterSettings extends Fragment {
+import me.paulqpro.filterapp.R;
+
+public class WindowFilterSettings extends Fragment {//settings of filter
     Activity activity;
 
     @Override
@@ -43,7 +45,7 @@ public class WindowFilterSettings extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         int cl;
-        try {
+        try {//if color is chosen, load color, otherwise load white
             FileInputStream is = new FileInputStream(new File(activity.getApplicationInfo().dataDir, "colors.tmp"));
             int
                     r = is.read(),
@@ -56,7 +58,7 @@ public class WindowFilterSettings extends Fragment {
             ((EditText)activity.findViewById(R.id.gTextNumber)).setText(Integer.toString(g));
             ((EditText)activity.findViewById(R.id.bTextNumber)).setText(Integer.toString(b));
         } catch (IOException e) { }
-        activity.findViewById(R.id.applyColorButton).setOnClickListener((View view1) -> {
+        activity.findViewById(R.id.applyColorButton).setOnClickListener((View view1) -> {// when apply button is pressed, save chosen color and display it
             View colorT = activity.findViewById(R.id.view3);
             EditText
                     rT = activity.findViewById(R.id.rTextNumber),

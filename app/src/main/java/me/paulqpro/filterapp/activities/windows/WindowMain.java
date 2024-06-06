@@ -1,7 +1,7 @@
-package me.paulqpro.filterapp;
+package me.paulqpro.filterapp.activities.windows;
 
 import static android.app.Activity.RESULT_OK;
-import static me.paulqpro.filterapp.MainActivityRequests.*;
+import static me.paulqpro.filterapp.misc.MainActivityRequests.*;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -30,16 +30,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-public class WindowMain extends Fragment {
-    static Activity activity;
+import me.paulqpro.filterapp.misc.BitmapImageHandler;
+import me.paulqpro.filterapp.R;
+
+public class WindowMain extends Fragment {//main screen
+    Activity activity;
     Uri image;
     Bitmap bitmap;
+    Context context = this.getContext();
 
     View.OnClickListener
             openClickListener = (View view) -> {
                 int cl = Color.WHITE;
                 try {
-                    FileInputStream is = new FileInputStream(new File(activity.getApplicationInfo().dataDir, "colors.tmp"));
+                    FileInputStream is = new FileInputStream(new File(activity.getApplicationInfo().dataDir, "colors.tmp"));//if color is chosen, load color, otherwise load white
                     int
                             r = is.read(),
                             g = is.read(),
@@ -54,7 +58,7 @@ public class WindowMain extends Fragment {
                 Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
                 intent.setType("image/*");
                 intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {"image/png", "image/jpeg"});
-                startActivityForResult(intent, SAVE_FILE);
+                startActivityForResult(intent, SAVE_FILE);//Built-in save file dialogue
             };
 
     void initBtns(){
@@ -105,7 +109,7 @@ public class WindowMain extends Fragment {
         intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {"image/png", "image/jpeg"});
         activity.findViewById(R.id.openImageButton).setOnClickListener((View view1) -> {
             Log.d("FLT:WND1","file open dialog");
-            startActivityForResult(intent, OPEN_FILE);
+            startActivityForResult(intent, OPEN_FILE);//Built-in open file dialogue
         });
     }
 
@@ -124,44 +128,43 @@ public class WindowMain extends Fragment {
                         Log.d("FLT:WND1","file opened");
                     } catch (IOException e) {
                         Log.e("FLT:WND1","file not opened. "+e.getMessage());
-                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, "Error opening file", Toast.LENGTH_LONG).show();
                     }
                     break;
                 case SAVE_FILE:
                     try {
                         Bitmap bmp;
                         try{
-                            bmp = BitmapImageHandler.open(Uri.fromFile(new File(activity.getApplicationInfo().dataDir, "result.tmp")),activity,false);
+                            bmp = BitmapImageHandler.open(Uri.fromFile(new File(activity.getApplicationInfo().dataDir, "result.tmp")),activity,false);//if filter was applied, load result
                         } catch (IOException e){
                             try{
-                                bmp = BitmapImageHandler.open(Uri.fromFile(new File(activity.getApplicationInfo().dataDir, "original.tmp")),activity,false);
+                                bmp = BitmapImageHandler.open(Uri.fromFile(new File(activity.getApplicationInfo().dataDir, "original.tmp")),activity,false);//otherwise, load original
                             } catch (IOException e1){
-                                bmp = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+                                bmp = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);//if original doesn't exist.
                             }
                         }
                         BitmapImageHandler.saveExternal(data.getData(),bmp,activity);
                         Log.d("FLT:WND1","file saved");
                     } catch (IOException e) {
                         Log.e("FLT:WND1","file not saved. "+e.getMessage());
-                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, "Error saving file", Toast.LENGTH_LONG).show();
                     }
                     break;
             }
         } else {
             Log.e("FLT:WND1","file not saved. "+data.getData().toString());
-            Toast.makeText(activity, data.getData().toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(activity, "Error saving file", Toast.LENGTH_LONG).show();
         }
     }
 
-    static class OneColorFilterTask extends AsyncTask<Integer, Integer, Void> {
-        Context context;
+     class OneColorFilterTask extends AsyncTask<Integer, Integer, Void> {
         float R,G,B;
 
         /**
          *Only first argument is used
          */
         @Override
-        protected Void doInBackground(@ColorInt Integer... colors) {
+        protected Void doInBackground(@ColorInt Integer... colors) {//apply 'AND' filter (removes all colors, except specified color. result is almost monochrome image (shades of gray act like dimming)
             R = Color.red(colors[0]) / 255f;
             G = Color.green(colors[0]) / 255f;
             B = Color.blue(colors[0]) / 255f;
@@ -171,7 +174,7 @@ public class WindowMain extends Fragment {
                 bitmap = BitmapImageHandler.open(Uri.fromFile(new File(context.getApplicationInfo().dataDir, "original.tmp")), context, true);
                 int w = bitmap.getWidth(), h = bitmap.getHeight();
                 int[] cls = new int[w*h];
-                bitmap.getPixels(cls,0,w,0,0,w,h);
+                bitmap.getPixels(cls,0,w,0,0,w,h);//operations with an array are slightly faster then operations with bitmap
                 pb.setMax(w*h);
                 for (int i = 0; i < w * h; i++) {
                     float r, g, b;
@@ -186,7 +189,7 @@ public class WindowMain extends Fragment {
                     pb.setProgress(pb.getProgress() + 1);
                 }
                 bitmap.setPixels(cls,0,w,0,0,w,h);
-                BitmapImageHandler.saveInternal("result.tmp", bitmap, context);
+                BitmapImageHandler.saveInternal("result.tmp", bitmap, context);//save result
             } catch (IOException e){
                 this.cancel(true);
             }
@@ -194,7 +197,7 @@ public class WindowMain extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(Void result){
+        protected void onPostExecute(Void result){//set image, when complete
             try {
                 ((ImageView) activity.findViewById(me.paulqpro.filterapp.R.id.imageView)).setImageBitmap(BitmapImageHandler.open(Uri.fromFile(new File(context.getApplicationInfo().dataDir, "result.tmp")), context, false));
             } catch (IOException e){
